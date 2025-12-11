@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>餵帕恰狗吃東西！</title>
+<style>
+    body {
+        font-family: "Noto Sans TC", sans-serif;
+        text-align: center;
+        background: #f6f8ff;
+        padding: 20px;
+    }
+    h1 {
+        color: #3a5ad9;
+    }
+    #pachi {
+        width: 250px;
+        transition: 0.3s;
+    }
+    #food {
+        width: 120px;
+        opacity: 0;
+        transition: 0.5s;
+    }
+    .btn {
+        background: #4d7bff;
+        border: none;
+        padding: 12px 25px;
+        font-size: 18px;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+    .btn:hover {
+        background: #365de0;
+    }
+</style>
+</head>
+
+<body>
+    <h1>🍎 餵帕恰狗吃東西！</h1>
+
+    <!-- 帕恰狗圖片（自行換成你喜歡的圖片 URL） -->
+    <img id="pachi" src="https://i.imgur.com/1K0XQak.png" alt="Pachirisu">
+
+    <br>
+
+    <!-- 食物顯示 -->
+    <img id="food" src="https://i.imgur.com/zmZAk0h.png" alt="Food">
+
+    <br><br>
+
+    <button class="btn" onclick="feed()">餵食！</button>
+
+    <script>
+        function feed() {
+            let pachi = document.getElementById("pachi");
+            let food = document.getElementById("food");
+
+            // 顯示食物
+            food.style.opacity = 1;
+
+            // 帕恰狗變大 + 開心
+            pachi.style.transform = "scale(1.1)";
+            
+            // 一秒後恢復
+            setTimeout(() => {
+                food.style.opacity = 0;
+                pachi.style.transform = "scale(1)";
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
