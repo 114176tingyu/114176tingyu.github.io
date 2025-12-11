@@ -20,7 +20,6 @@
         align-items: center;
     }
 
-    /* 籃子 */
     .basket {
         width: 180px;
         padding: 15px;
@@ -37,18 +36,11 @@
         user-select: none;
     }
 
-    /* 帕恰狗 */
     #pachi {
         width: 300px;
-        transition: transform .3s, filter .3s;
+        transition: filter .2s, transform .2s;
     }
 
-    .mouth-open {
-        transform: scale(1.08);
-        filter: brightness(1.15);
-    }
-
-    /* 拖曳中物件 */
     .dragging {
         position: absolute;
         pointer-events: none;
@@ -61,15 +53,14 @@
 
 <div class="game">
 
-    <!-- 籃子 -->
     <div class="basket">
         <h3>🧺 籃子</h3>
-        <img class="item" data-type="carrot" src="https://raw.githubusercontent.com/happyfunch/img-assets/main/carrot.png">
-        <img class="item" data-type="banana" src="https://raw.githubusercontent.com/happyfunch/img-assets/main/banana.png">
+        <img class="item" data-type="carrot" src="carrot.png">
+        <img class="item" data-type="banana" src="banana.png">
     </div>
 
-    <!-- 帕恰狗 -->
-    <img id="pachi" src="https://raw.githubusercontent.com/happyfunch/img-assets/main/pachi.png">
+    <!-- 初始為閉嘴版本 -->
+    <img id="pachi" src="pachi_close.png">
 </div>
 
 <script>
@@ -79,21 +70,15 @@
     let draggingItem = null;
     let originalItem = null;
 
-    // 補貨
     function spawnFood(type) {
         const img = document.createElement("img");
         img.className = "item";
         img.dataset.type = type;
-
-        img.src = type === "carrot"
-            ? "https://raw.githubusercontent.com/happyfunch/img-assets/main/carrot.png"
-            : "https://raw.githubusercontent.com/happyfunch/img-assets/main/banana.png";
-
+        img.src = type === "carrot" ? "carrot.png" : "banana.png";
         basket.appendChild(img);
         makeDraggable(img);
     }
 
-    // 讓物件可拖曳
     function makeDraggable(item) {
         item.addEventListener("mousedown", (e) => {
             originalItem = item;
@@ -102,8 +87,7 @@
             draggingItem.classList.add("dragging");
             document.body.appendChild(draggingItem);
 
-            item.style.opacity = 0.3; // 原物變淡
-
+            item.style.opacity = 0.3;
             moveDragged(e);
         });
     }
@@ -112,6 +96,21 @@
         if (!draggingItem) return;
         draggingItem.style.left = e.pageX + "px";
         draggingItem.style.top = e.pageY + "px";
+
+        const mouth = pachi.getBoundingClientRect();
+
+        const nearMouth =
+            e.pageX > mouth.left + 40 &&
+            e.pageX < mouth.right - 40 &&
+            e.pageY > mouth.top + mouth.height * 0.40 &&
+            e.pageY < mouth.bottom;
+
+        // 靠近嘴 → 張嘴
+        if (nearMouth) {
+            pachi.src = "pachi_open.png";
+        } else {
+            pachi.src = "pachi_close.png";
+        }
     }
 
     document.addEventListener("mousemove", moveDragged);
@@ -119,3 +118,38 @@
     document.addEventListener("mouseup", (e) => {
         if (!draggingItem) return;
 
+        const mouth = pachi.getBoundingClientRect();
+        const inMouth =
+            e.pageX > mouth.left + 40 &&
+            e.pageX < mouth.right - 40 &&
+            e.pageY > mouth.top + mouth.height * 0.45 &&
+            e.pageY < mouth.bottom;
+
+        const type = draggingItem.dataset.type;
+
+        if (inMouth) {
+            // 吃掉
+            pachi.src = "pachi_open.png";
+
+            setTimeout(() => {
+                pachi.src = "pachi_close.png";
+            }, 300);
+
+            spawnFood(type);
+        } else {
+            pachi.src = "pachi_close.png";
+        }
+
+        draggingItem.remove();
+        draggingItem = null;
+
+        if (originalItem) {
+            originalItem.style.opacity = 1;
+        }
+    });
+
+    document.querySelectorAll(".item").forEach(makeDraggable);
+</script>
+
+</body>
+</html>
