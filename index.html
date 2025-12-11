@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餵帕恰狗</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f6f8ff;
+        font-family: "Noto Sans TC", sans-serif;
+    }
+
+    .game {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+    }
+
+    /* 籃子 */
+    .basket {
+        width: 180px;
+        padding: 15px;
+        background: #f0d5a1;
+        border: 4px solid #b8874b;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .item {
+        width: 80px;
+        margin: 10px auto;
+        cursor: grab;
+        user-select: none;
+    }
+
+    /* 帕恰狗 */
+    #pachi {
+        width: 300px;
+        transition: transform .3s;
+    }
+    .mouth-open {
+        transform: scale(1.08);
+        filter: brightness(1.1);
+    }
+
+    /* 拖曳中物件 */
+    .dragging {
+        position: absolute;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+    }
+</style>
+</head>
+<body>
+
+<div class="game">
+
+    <!-- 籃子 -->
+    <div class="basket">
+        <h3>🧺 籃子</h3>
+        <img class="item" data-type="carrot" src="https://i.imgur.com/z9jY6Ld.png">
+        <img class="item" data-type="banana" src="https://i.imgur.com/dTZ0V8n.png">
+    </div>
+
+    <!-- 帕恰狗 -->
+    <img id="pachi" src="https://i.imgur.com/1K0XQak.png">
+</div>
+
+<script>
+    const pachi = document.getElementById("pachi");
+    const basket = document.querySelector(".basket");
+
+    let draggingItem = null;
+
+    // 產生新的食物（補貨）
+    function spawnFood(type) {
+        const img = document.createElement("img");
+        img.className = "item";
+        img.dataset.type = type;
+        img.src = (type === "carrot")
+            ? "https://i.imgur.com/z9jY6Ld.png"
+            : "https://i.imgur.com/dTZ0V8n.png";
+        basket.appendChild(img);
+        makeDraggable(img);
+    }
+
+    // 讓食物可拖曳
+    function makeDraggable(item) {
+        item.addEventListener("mousedown", (e) => {
+            draggingItem = item.cloneNode(true);
+            draggingItem.classList.add("dragging");
+            document.body.appendChild(draggingItem);
+            item.style.opacity = 0.3;
+
+            moveItem(e);
+        });
+    }
+
+    function moveItem(e) {
+        if (!draggingItem) return;
+        draggingItem.style.left = e.pageX + "px";
+        draggingItem.style.top = e.pageY + "px";
+    }
+
+    document.addEventListener("mousemove", moveItem);
+
+    document.addEventListener("mouseup", (e) => {
+        if (!draggingItem) return;
+
+        const mouthArea = pachi.getBoundingClientRect();
+
+        // 判斷是否餵到嘴巴（大概在圖片中央偏下）
+        const isInMouth =
+            e.pageX > mouthArea.left + 50 &&
+            e.pageX < mouthArea.right - 50 &&
+            e.pageY > mouthArea.top + mouthArea.height * 0.45 &&
+            e.pageY < mouthArea.bottom;
+
+        const originalType = draggingItem.dataset.type;
+
+        // 吃掉！
+        if (isInMouth) {
+            pachi.classList.add("mouth-open");
+
+            setTimeout(() => {
+                pachi.classList.remove("mouth-open");
+            }, 500);
+
+            // 補貨
+            spawnFood(originalType);
+        }
+
+        // 移除拖曳物件
+        document.body.removeChild(draggingItem);
+        draggingItem = null;
+
+        // 原本籃子裡的食物恢復
+        const originalItem = document.querySelector(`.item[data-type="${originalType}"]`);
+        if (originalItem) originalItem.style.opacity = 1;
+    });
+
+    // 對籃子裡原始的食物套用拖曳機制
+    document.querySelectorAll(".item").forEach(makeDraggable);
+</script>
+
+</body>
+</html>
