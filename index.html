@@ -80,8 +80,7 @@
     }
 
     function makeDraggable(item) {
-       item.addEventListener("mousedown", (e) => {
-    if (feedCount >= MAX_FEED) return;
+    item.addEventListener("mousedown", (e) => {
             originalItem = item;
 
             draggingItem = item.cloneNode(true);
